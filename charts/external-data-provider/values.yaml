@@ -2,6 +2,17 @@ certDir: /certs
 clientCAFile: /tmp/gatekeeper/ca.crt
 port: 8090
 provider:
-  timeout: 1
+  timeout: 30
   tls:
     caBundle: ""
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false # need to fix go-tuf temp dir
+  runAsGroup: 65532
+  runAsNonRoot: true
+  runAsUser: 65532
+  seccompProfile:
+    type: RuntimeDefault
