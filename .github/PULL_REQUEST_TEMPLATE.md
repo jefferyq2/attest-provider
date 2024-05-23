@@ -1,6 +1,8 @@
-**What this PR does / why we need it**:
+## Summary
+<!-- Description of why the pull request is needed and what it changes -->
 
-**Which issue(s) this PR fixes** *(optional, using `fixes #<issue number>(, fixes #<issue_number>, ...)` format, will close the issue(s) when the PR gets merged)*:
-Fixes #
+### Tests
+<!-- Provide evidence of testing -->
 
-**Special notes for your reviewer**:
+### Issue
+<!-- link to GitHub/Jira issue that this is part of -->

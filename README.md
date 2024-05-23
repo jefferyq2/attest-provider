@@ -1,6 +1,6 @@
-# External Data Provider
+# Attest External Data Provider
 
-A template repository for building external data providers for Gatekeeper.
+OPA Gatekeeper external data provider implementation for Docker attest library image attestation verification.
 
 ## Prerequisites
 
@@ -23,20 +23,20 @@ helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 helm install gatekeeper/gatekeeper \
     --set enableExternalData=true \
     --name-template=gatekeeper \
-    --namespace gatekeeper-system \
+    --namespace security \
     --create-namespace
 ```
 
 3. Build and deploy the external data provider.
 
 ```bash
-git clone https://github.com/open-policy-agent/gatekeeper-external-data-provider.git
-cd external-data-provider
+git clone https://github.com/docker/attest-external-data-provider.git
+cd attest-external-data-provider
 
 # if you are not planning to establish mTLS between the provider and Gatekeeper,
 # deploy the provider to a separate namespace. Otherwise, do not run the following command
 # and deploy the provider to the same namespace as Gatekeeper.
-export NAMESPACE=provider-system
+export NAMESPACE=security
 
 # generate a self-signed certificate for the external data provider
 ./scripts/generate-tls-cert.sh
@@ -50,38 +50,35 @@ make kind-load-image
 # Choose one of the following ways to deploy the external data provider:
 
 # 1. client and server auth enabled (recommended)
-helm install external-data-provider charts/external-data-provider \
+helm install attest-provider charts/external-data-provider \
     --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
     --namespace "${NAMESPACE:-gatekeeper-system}"
 
 # 2. client auth disabled and server auth enabled
-helm install external-data-provider charts/external-data-provider \
+helm install attest-provider charts/external-data-provider \
     --set clientCAFile="" \
     --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
     --namespace "${NAMESPACE:-gatekeeper-system}" \
     --create-namespace
-```
 
 4a. Install constraint template and constraint.
 
 ```bash
-kubectl apply -f validation/external-data-provider-constraint-template.yaml
-kubectl apply -f validation/external-data-provider-constraint.yaml
+kubectl apply -f validation/attest-constraint-template.yaml
+kubectl apply -f validation/attest-constraint.yaml
 ```
 
 4b. Test the external data provider by dry-running the following command:
 
 ```bash
-kubectl run nginx --image=error_nginx --dry-run=server -ojson
+kubectl create ns test
+kubectl run nginx -n test --dry-run=server -ojson
 ```
 
-Gatekeeper should deny the pod admission above because the image field has an `error_nginx` prefix.
+Gatekeeper should deny the pod admission above because the image `nginx` is missing signed annotations but has an image policy in tuf-staging.
 
-```console
-Error from server (Forbidden): admission webhook "validation.gatekeeper.sh" denied the request: [deny-images-with-invalid-suffix] invalid response: {"errors": [["error_nginx", "error_nginx_invalid"]], "responses": [], "status_code": 200, "system_error": ""}
-```
-
-5a. Install Assign mutation.
+TODO: implement mutating policy (tag -> digest)
+<!-- 5a. Install Assign mutation.
 
 ```bash
 kubectl apply -f mutation/external-data-provider-mutation.yaml
@@ -103,13 +100,13 @@ The expected JSON output should have the following image field with `_valid` app
         ...
     }
 ]
-```
+``` -->
 
-6. Uninstall the external data provider and Gatekeeper.
+1. Uninstall the external data provider and Gatekeeper.
 
 ```bash
 kubectl delete -f validation/
-kubectl delete -f mutation/
-helm uninstall external-data-provider --namespace "${NAMESPACE:-gatekeeper-system}"
-helm uninstall gatekeeper --namespace gatekeeper-system
+# kubectl delete -f mutation/ TODO: implement mutation
+helm uninstall attest-provider --namespace "${NAMESPACE:-gatekeeper-system}"
+helm uninstall gatekeeper --namespace security
 ```
