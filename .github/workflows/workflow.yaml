@@ -84,17 +84,17 @@ jobs:
             --version ${GATEKEEPER_VERSION} \
             --set enableExternalData=true \
             --name-template=gatekeeper \
-            --namespace gatekeeper-system \
+            --namespace security \
             --create-namespace \
             --debug
 
-      - name: Build and install external-data-provider
+      - name: Build and install attest-external-data-provider
         run: |
           ./scripts/generate-tls-cert.sh
           make docker-buildx kind-load-image
-          helm install external-data-provider charts/external-data-provider \
+          helm install attest-provider charts/external-data-provider \
             --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
-            --namespace gatekeeper-system \
+            --namespace security \
             --wait --debug
 
       - name: Run e2e
