@@ -1,26 +1,18 @@
-ARG BUILDPLATFORM="linux/amd64"
 ARG BUILDERIMAGE="golang:1.22"
 ARG BASEIMAGE="gcr.io/distroless/static:nonroot"
 
-FROM --platform=${BUILDPLATFORM} ${BUILDERIMAGE} as builder
+FROM ${BUILDERIMAGE} as builder
 
-ARG TARGETPLATFORM
-ARG TARGETOS
-ARG TARGETARCH
-ARG TARGETVARIANT=""
 ARG LDFLAGS
 
 ENV GO111MODULE=on \
-  CGO_ENABLED=0 \
-  GOOS=${TARGETOS} \
-  GOARCH=${TARGETARCH} \
-  GOARM=${TARGETVARIANT}
+  CGO_ENABLED=0
 
-WORKDIR /go/src/github.com/docler/attest-external-data-provider
+WORKDIR /go/src/github.com/docker/attest-external-data-provider
 
 COPY . .
 
-# This block can be replaced by `RUN go mod download` when github.com/docker/attest is public
+# --- This block can be replaced by `RUN go mod download` when github.com/docker/attest is public
 ENV GOPRIVATE="github.com/docker/attest"
 RUN --mount=type=secret,id=GITHUB_TOKEN <<EOT
   set -e
@@ -31,11 +23,12 @@ RUN --mount=type=secret,id=GITHUB_TOKEN <<EOT
   fi
   go mod download
 EOT
+# ---
 RUN make build
 
 FROM ${BASEIMAGE}
 
-COPY --from=builder /go/src/github.com/docker/attest-external-data-provider/bin/attest .
+COPY --from=builder /go/src/github.com/docker/attest-external-data-provider/bin/attest /
 
 COPY --from=builder --chown=65532:65532 /go/src/github.com/docker/attest-external-data-provider/certs/tls.crt \
   /go/src/github.com/docker/attest-external-data-provider/certs/tls.key \
