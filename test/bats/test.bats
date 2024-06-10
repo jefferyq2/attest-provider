@@ -21,6 +21,7 @@ teardown_file() {
 
 @test "attest-provider is running" {
   wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "kubectl -n ${GATEKEEPER_NAMESPACE} wait --for=condition=Ready --timeout=60s pod -l run=attest-provider"
+  sleep 5 # we need a readiness probe https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes
 }
 
 @test "attest validation" {
