@@ -8,7 +8,7 @@ GATEKEEPER_NAMESPACE=${GATEKEEPER_NAMESPACE:-gatekeeper-system}
 
 teardown_file() {
   kubectl delete -f validation/
-  kubectl delete -f mutation/
+  #kubectl delete -f mutation/
 }
 
 @test "gatekeeper-controller-manager is running" {
@@ -32,7 +32,8 @@ teardown_file() {
   assert_success
   wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "constraint_enforced k8sattestexternaldata deny-images-that-fail-policy"
 
-  run kubectl run nginx --image=nginx --dry-run=server
+  run kubectl create ns test
+  run kubectl run nginx --image=nginx -n test --dry-run=server
   # should deny pod admission if the image doesn't pass policy
   assert_failure
   assert_match 'admit: false' "${output}"

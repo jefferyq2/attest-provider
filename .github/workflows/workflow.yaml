@@ -122,4 +122,5 @@ jobs:
 
       - name: Run e2e
         run: |
+          export GATEKEEPER_NAMESPACE=security
           bats -t test/bats/test.bats
