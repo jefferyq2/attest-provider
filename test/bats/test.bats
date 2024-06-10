@@ -19,33 +19,33 @@ teardown_file() {
   wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "kubectl -n ${GATEKEEPER_NAMESPACE} wait --for=condition=Ready --timeout=60s pod -l control-plane=audit-controller"
 }
 
-@test "external-data-provider is running" {
-  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "kubectl -n ${GATEKEEPER_NAMESPACE} wait --for=condition=Ready --timeout=60s pod -l run=external-data-provider"
+@test "attest-provider is running" {
+  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "kubectl -n ${GATEKEEPER_NAMESPACE} wait --for=condition=Ready --timeout=60s pod -l run=attest-provider"
 }
 
-@test "external data validation" {
-  run kubectl apply -f validation/external-data-provider-constraint-template.yaml
+@test "attest validation" {
+  run kubectl apply -f validation/attest-constraint-template.yaml
   assert_success
-  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "constraint_enforced constrainttemplate k8sexternaldatavalidation"
+  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "constraint_enforced constrainttemplate k8sattestexternaldata"
 
-  run kubectl apply -f validation/external-data-provider-constraint.yaml
+  run kubectl apply -f validation/attest-constraint.yaml
   assert_success
-  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "constraint_enforced k8sexternaldatavalidation deny-images-with-invalid-suffix"
+  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "constraint_enforced k8sattestexternaldata deny-images-that-fail-policy"
 
-  run kubectl run nginx --image=error_nginx --dry-run=server
-  # should deny pod admission if the image name has an "error_" prefix
+  run kubectl run nginx --image=nginx --dry-run=server
+  # should deny pod admission if the image doesn't pass policy
   assert_failure
-  assert_match 'error_nginx' "${output}"
-  assert_match 'error_nginx_invalid' "${output}"
+  assert_match 'admit: false' "${output}"
 }
 
-@test "external data mutation" {
-  run kubectl apply -f mutation/external-data-provider-mutation.yaml
-  assert_success
-  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "mutator_enforced Assign append-valid-suffix-to-image"
-
-  run kubectl run nginx --image=nginx --dry-run=server --output json
-  assert_success
-  # should mutate the image field by appending "_valid" suffix
-  assert_match "nginx_valid" "$(jq -r '.spec.containers[0].image' <<< ${output})"
-}
+# TODO: write mutating webhook policy
+#@test "attest mutation" {
+#  run kubectl apply -f mutation/external-data-provider-mutation.yaml
+#  assert_success
+#  wait_for_process ${WAIT_TIME} ${SLEEP_TIME} "mutator_enforced Assign append-valid-suffix-to-image"
+#
+#  run kubectl run nginx --image=nginx --dry-run=server --output json
+#  assert_success
+#  # should mutate the image field by appending "_valid" suffix
+#  assert_match "nginx_valid" "$(jq -r '.spec.containers[0].image' <<< ${output})"
+#}

@@ -28,10 +28,18 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Set up Go 1.19
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
+        with:
+          app-id: ${{ vars.DOCKER_READ_APP_ID }}
+          private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
+          repositories: "attest,attest-external-data-provider"
+
+      - name: Set up Go 1.22
         uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
         with:
-          go-version: 1.19
+          go-version: 1.22
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
@@ -40,7 +48,8 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64 # v6.0.1
         with:
-          version: v1.50.0
+          version: v1.59
+          github-token: ${{ steps.app-token.outputs.token }}
 
   helm_build_test:
     name: "[Helm] Build and Test"
@@ -54,13 +63,21 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Set up Go 1.19
+      - name: Set up Go 1.22
         uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
         with:
-          go-version: 1.19
+          go-version: 1.22
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
+        with:
+          app-id: ${{ vars.DOCKER_READ_APP_ID }}
+          private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
+          repositories: "attest,attest-external-data-provider"
 
       - name: Bootstrap e2e
         env:
@@ -91,6 +108,7 @@ jobs:
       - name: Build and install attest-external-data-provider
         run: |
           ./scripts/generate-tls-cert.sh
+          export GITHUB_TOKEN=${{ steps.app-token.outputs.token }}
           make docker-buildx kind-load-image
           helm install attest-provider charts/external-data-provider \
             --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
