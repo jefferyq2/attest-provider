@@ -86,8 +86,8 @@ jobs:
 
       - name: Bootstrap e2e
         env:
-          KIND_VERSION: 0.17.0
-          BATS_VERSION: 1.8.2
+          KIND_VERSION: 0.23.0
+          BATS_VERSION: 1.11.0
         run: |
           mkdir -p $GITHUB_WORKSPACE/bin
           echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
@@ -96,7 +96,7 @@ jobs:
 
       - name: Create a kind cluster and install Gatekeeper
         env:
-          GATEKEEPER_VERSION: 3.11.0
+          GATEKEEPER_VERSION: 3.16.3
           KUBERNETES_VERSION: 1.26.0
         run: |
           kind create cluster --image kindest/node:v${KUBERNETES_VERSION} --name gatekeeper
