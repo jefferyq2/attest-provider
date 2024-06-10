@@ -104,6 +104,9 @@ jobs:
           helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
           helm install gatekeeper/gatekeeper \
             --version ${GATEKEEPER_VERSION} \
+            --set postInstall.probeWebhook.httpTimeout=300 \
+            --set postInstall.probeWebhook.waitTimeout=300 \
+            --set validatingWebhookFailurePolicy=Fail \
             --set enableExternalData=true \
             --name-template=gatekeeper \
             --namespace security \
