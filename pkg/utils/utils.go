@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 
 	"github.com/open-policy-agent/frameworks/constraint/pkg/externaldata"
 	"k8s.io/klog/v2"
@@ -35,13 +34,13 @@ func SendResponse(results *[]externaldata.Item, systemErr string, w http.Respons
 	body, err := json.Marshal(response)
 	if err != nil {
 		klog.ErrorS(err, "unable to marshal response")
-		os.Exit(1)
+		panic(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(body)
 	if err != nil {
 		klog.ErrorS(err, "unable to write response")
-		os.Exit(1)
+		return
 	}
 }
