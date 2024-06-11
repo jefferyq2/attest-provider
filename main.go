@@ -38,7 +38,7 @@ func init() {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler.Handler)
+	mux.HandleFunc("POST /", handler.Handler)
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),

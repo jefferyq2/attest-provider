@@ -19,11 +19,6 @@ import (
 )
 
 func Handler(w http.ResponseWriter, req *http.Request) {
-	// only accept POST requests
-	if req.Method != http.MethodPost {
-		utils.SendResponse(nil, "only POST is allowed", w)
-		return
-	}
 
 	// read request body
 	requestBody, err := io.ReadAll(req.Body)
