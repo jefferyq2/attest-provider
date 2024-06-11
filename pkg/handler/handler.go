@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/docker/attest/pkg/attest"
 	"github.com/docker/attest/pkg/oci"
@@ -18,7 +19,17 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Handler(w http.ResponseWriter, req *http.Request) {
+func Handler() http.Handler {
+	return http.HandlerFunc(handler)
+}
+
+func handler(w http.ResponseWriter, req *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			klog.Error(string(debug.Stack()))
+			klog.ErrorS(fmt.Errorf("%v", r), "panic occurred")
+		}
+	}()
 
 	// read request body
 	requestBody, err := io.ReadAll(req.Body)

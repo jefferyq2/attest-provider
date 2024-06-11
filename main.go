@@ -11,11 +11,13 @@ import (
 	"time"
 
 	"github.com/open-policy-agent/gatekeeper-external-data-provider/pkg/handler"
+	"github.com/open-policy-agent/gatekeeper-external-data-provider/pkg/utils"
 
 	"k8s.io/klog/v2"
 )
 
 const (
+	timeout     = 15 * time.Second
 	defaultPort = 8090
 
 	certName = "tls.crt"
@@ -28,6 +30,8 @@ var (
 	port         int
 )
 
+var timeoutError = string(utils.GatekeeperError("operation timed out"))
+
 func init() {
 	klog.InitFlags(nil)
 	flag.StringVar(&certDir, "cert-dir", "", "path to directory containing TLS certificates")
@@ -38,12 +42,12 @@ func init() {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /", handler.Handler)
+	mux.Handle("POST /", http.TimeoutHandler(handler.Handler(), timeout, timeoutError))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
 		Handler:           mux,
-		ReadHeaderTimeout: time.Duration(15) * time.Second,
+		ReadHeaderTimeout: 15 * time.Second,
 	}
 
 	config := &tls.Config{
@@ -79,25 +83,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-// TODO: root cause Content-Length header error
-// func processTimeout(h http.HandlerFunc, duration time.Duration) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		ctx, cancel := context.WithTimeout(r.Context(), duration)
-// 		defer cancel()
-
-// 		r = r.WithContext(ctx)
-
-// 		processDone := make(chan bool)
-// 		go func() {
-// 			h(w, r)
-// 			processDone <- true
-// 		}()
-
-// 		select {
-// 		case <-ctx.Done():
-// 			utils.SendResponse(nil, "operation timed out", w)
-// 		case <-processDone:
-// 		}
-// 	}
-// }
