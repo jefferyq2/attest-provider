@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -74,7 +73,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// verify attestations
-		ctx := context.TODO()
+		ctx := req.Context()
 		debug := true
 		ctx = policy.WithPolicyEvaluator(ctx, policy.NewRegoEvaluator(debug))
 		policy, err := attest.Verify(ctx, opts, resolver)
