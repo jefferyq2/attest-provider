@@ -34,7 +34,7 @@ docker-buildx: docker-buildx-builder
 
 .PHONY: kind-load-image
 kind-load-image:
-	kind load docker-image ${IMG}
+	kind load docker-image ${IMG} --name gatekeeper
 
 .PHONY: rollout-restart
 rollout-restart:

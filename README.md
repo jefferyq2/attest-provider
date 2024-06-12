@@ -14,7 +14,7 @@ OPA Gatekeeper external data provider implementation for Docker attest library i
 1. Create a [kind cluster](https://kind.sigs.k8s.io/docs/user/quick-start/).
 
 ```bash
-kind create cluster
+kind create cluster --name gatekeeper
 ```
 
 2. Install the latest version of Gatekeeper and enable the external data feature.
