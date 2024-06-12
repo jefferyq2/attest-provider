@@ -12,13 +12,13 @@ generate() {
     # generate CA key and certificate
     echo "Generating CA key and certificate for attest-provider..."
     openssl genrsa -out ca.key 2048
-    openssl req -new -x509 -days 1 -key ca.key -subj "/O=Gatekeeper/CN=Gatekeeper Root CA" -out ca.crt
+    openssl req -new -x509 -days 3650 -key ca.key -subj "/O=Gatekeeper/CN=Gatekeeper Root CA" -out ca.crt
 
     # generate server key and certificate
     echo "Generating server key and certificate for attest-provider..."
     openssl genrsa -out tls.key 2048
     openssl req -newkey rsa:2048 -nodes -keyout tls.key -subj "/CN=attest-provider.${NAMESPACE}" -out server.csr
-    openssl x509 -req -extfile <(printf "subjectAltName=DNS:attest-provider.%s" "${NAMESPACE}") -days 1 -sha256 -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out tls.crt
+    openssl x509 -req -extfile <(printf "subjectAltName=DNS:attest-provider.%s" "${NAMESPACE}") -days 3650 -sha256 -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out tls.crt
 }
 
 mkdir -p "${REPO_ROOT}/certs"
