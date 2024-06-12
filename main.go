@@ -17,7 +17,11 @@ import (
 )
 
 const (
-	timeout     = 15 * time.Second
+	handlerTimeout    = 15 * time.Second
+	readHeaderTimeout = 1 * time.Second
+)
+
+const (
 	defaultPort = 8090
 
 	certName = "tls.crt"
@@ -42,12 +46,12 @@ func init() {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("POST /", http.TimeoutHandler(handler.Handler(), timeout, timeoutError))
+	mux.Handle("POST /", http.TimeoutHandler(handler.Handler(), handlerTimeout, timeoutError))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
 		Handler:           mux,
-		ReadHeaderTimeout: 15 * time.Second,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	config := &tls.Config{
