@@ -14,7 +14,7 @@ COPY . .
 
 # --- This block can be replaced by `RUN go mod download` when github.com/docker/attest is public
 ENV GOPRIVATE="github.com/docker/attest"
-RUN --mount=type=secret,id=GITHUB_TOKEN <<EOT
+RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=secret,id=GITHUB_TOKEN <<EOT
   set -e
   GITHUB_TOKEN=${GITHUB_TOKEN:-$(cat /run/secrets/GITHUB_TOKEN)}
   if [ -n "$GITHUB_TOKEN" ]; then
@@ -24,7 +24,8 @@ RUN --mount=type=secret,id=GITHUB_TOKEN <<EOT
   go mod download
 EOT
 # ---
-RUN make build
+
+RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/root/.cache/go-build make build
 
 FROM ${BASEIMAGE}
 

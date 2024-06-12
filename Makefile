@@ -35,3 +35,10 @@ docker-buildx: docker-buildx-builder
 .PHONY: kind-load-image
 kind-load-image:
 	kind load docker-image ${IMG} --name gatekeeper
+
+.PHONY: rollout-restart
+rollout-restart:
+	kubectl -n security rollout restart deployment/attest-provider
+
+.PHONY: reload
+reload: docker-buildx kind-load-image rollout-restart

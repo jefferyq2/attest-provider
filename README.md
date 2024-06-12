@@ -13,6 +13,10 @@ OPA Gatekeeper external data provider implementation for Docker attest library i
 
 1. Create a [kind cluster](https://kind.sigs.k8s.io/docs/user/quick-start/).
 
+```bash
+kind create cluster --name gatekeeper
+```
+
 2. Install the latest version of Gatekeeper and enable the external data feature.
 
 ```bash
@@ -23,6 +27,9 @@ helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 helm install gatekeeper/gatekeeper \
     --set enableExternalData=true \
     --set validatingWebhookFailurePolicy=Fail \
+    --set validatingWebhookTimeoutSeconds=30 \
+    --set postInstall.probeWebhook.enabled=false \
+    --set postInstall.labelNamespace.enabled=false \
     --name-template=gatekeeper \
     --namespace security \
     --create-namespace
@@ -61,31 +68,33 @@ helm install attest-provider charts/external-data-provider \
     --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
     --namespace "${NAMESPACE:-gatekeeper-system}" \
     --create-namespace
+```
 
-4a. Install constraint template and constraint.
+4. Install constraint template and constraint.
 
 ```bash
 kubectl apply -f validation/attest-constraint-template.yaml
 kubectl apply -f validation/attest-constraint.yaml
 ```
 
-4b. Test the external data provider by dry-running the following command:
+5. Test the external data provider by dry-running the following command:
 
 ```bash
 kubectl create ns test
-kubectl run nginx -n test --dry-run=server -ojson
+kubectl run nginx --image nginx -n test --dry-run=server -ojson
 ```
 
 Gatekeeper should deny the pod admission above because the image `nginx` is missing signed annotations but has an image policy in tuf-staging.
 
 TODO: implement mutating policy (tag -> digest)
-<!-- 5a. Install Assign mutation.
+
+<!-- 6. Install Assign mutation.
 
 ```bash
 kubectl apply -f mutation/external-data-provider-mutation.yaml
 ```
 
-5b. Test the external data provider by dry-running the following command:
+7. Test the external data provider by dry-running the following command:
 
 ```bash
 kubectl run nginx --image=nginx --dry-run=server -ojson
@@ -102,6 +111,12 @@ The expected JSON output should have the following image field with `_valid` app
     }
 ]
 ``` -->
+
+1. To reload the attest-provider image after making changes, run the following command:
+
+```bash
+make reload
+```
 
 1. Uninstall the external data provider and Gatekeeper.
 

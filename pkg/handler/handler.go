@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/docker/attest/pkg/attest"
 	"github.com/docker/attest/pkg/oci"
@@ -18,12 +18,17 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Handler(w http.ResponseWriter, req *http.Request) {
-	// only accept POST requests
-	if req.Method != http.MethodPost {
-		utils.SendResponse(nil, "only POST is allowed", w)
-		return
-	}
+func Handler() http.Handler {
+	return http.HandlerFunc(handler)
+}
+
+func handler(w http.ResponseWriter, req *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			klog.Error(string(debug.Stack()))
+			klog.ErrorS(fmt.Errorf("%v", r), "panic occurred")
+		}
+	}()
 
 	// read request body
 	requestBody, err := io.ReadAll(req.Body)
@@ -68,7 +73,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// verify attestations
-		ctx := context.TODO()
+		ctx := req.Context()
 		debug := true
 		ctx = policy.WithPolicyEvaluator(ctx, policy.NewRegoEvaluator(debug))
 		policy, err := attest.Verify(ctx, opts, resolver)
