@@ -11,18 +11,24 @@ import (
 	"github.com/docker/attest/pkg/attest"
 	"github.com/docker/attest/pkg/oci"
 	"github.com/docker/attest/pkg/policy"
-	"github.com/docker/attest/pkg/tuf"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/open-policy-agent/frameworks/constraint/pkg/externaldata"
-	"github.com/open-policy-agent/gatekeeper-external-data-provider/internal/embed"
 	"github.com/open-policy-agent/gatekeeper-external-data-provider/pkg/utils"
 	"k8s.io/klog/v2"
 )
 
-func Handler() http.Handler {
-	return http.HandlerFunc(handler)
+type ValidationResult struct {
+	Outcome    attest.Outcome      `json:"outcome"`
+	Input      *policy.PolicyInput `json:"input"`
+	VSA        *intoto.Statement   `json:"vsa"`
+	Violations []policy.Violation  `json:"violations"`
 }
 
-func handler(w http.ResponseWriter, req *http.Request) {
+func Validate() http.Handler {
+	return http.HandlerFunc(validate)
+}
+
+func validate(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
 			klog.Error(string(debug.Stack()))
@@ -56,7 +62,6 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		utils.SendResponse(nil, err.Error(), w)
 	}
 
-	// iterate over all keys
 	for _, key := range providerRequest.Request.Keys {
 		// create a resolver for remote attestations
 		platform := "linux/amd64"
@@ -102,15 +107,4 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	utils.SendResponse(&results, "", w)
-}
-
-func createTufClient(outputPath string) (*tuf.TufClient, error) {
-	// using oci tuf metadata and targets
-	metadataURI := "registry-1.docker.io/docker/tuf-metadata:latest"
-	targetsURI := "registry-1.docker.io/docker/tuf-targets"
-	// example using http tuf metadata and targets
-	// metadataURI := "https://docker.github.io/tuf-staging/metadata"
-	// targetsURI := "https://docker.github.io/tuf-staging/targets"
-
-	return tuf.NewTufClient(embed.StagingRoot, outputPath, metadataURI, targetsURI, tuf.NewVersionChecker())
 }

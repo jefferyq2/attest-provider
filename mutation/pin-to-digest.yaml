@@ -1,20 +1,22 @@
 apiVersion: mutations.gatekeeper.sh/v1beta1
 kind: Assign
 metadata:
-  name: append-valid-suffix-to-image
+  name: pin-to-digest
 spec:
   applyTo:
-  - groups: [""]
-    kinds: ["Pod"]
-    versions: ["v1"]
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
   match:
     scope: Namespaced
     kinds:
-    - apiGroups: ["*"]
-      kinds: ["Pod"]
+      - apiGroups: ["*"]
+        kinds: ["Pod"]
+    namespaces: ["test"]
   location: "spec.containers[name: *].image"
   parameters:
     assign:
       externalData:
-        provider: external-data-provider
+        provider: attest-provider-mutate
         dataSource: ValueAtLocation
+        failurePolicy: Fail

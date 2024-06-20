@@ -1,8 +1,17 @@
 apiVersion: externaldata.gatekeeper.sh/v1beta1
 kind: Provider
 metadata:
-  name: attest-provider
+  name: attest-provider-validate
 spec:
-  url: https://attest-provider.{{ .Release.Namespace }}:{{ .Values.port }}
+  url: https://attest-provider.{{ .Release.Namespace }}:{{ .Values.port }}/validate
+  timeout: {{ .Values.provider.timeout }}
+  caBundle: {{ required "You must provide .Values.provider.tls.caBundle" .Values.provider.tls.caBundle }}
+---
+apiVersion: externaldata.gatekeeper.sh/v1beta1
+kind: Provider
+metadata:
+  name: attest-provider-mutate
+spec:
+  url: https://attest-provider.{{ .Release.Namespace }}:{{ .Values.port }}/mutate
   timeout: {{ .Values.provider.timeout }}
   caBundle: {{ required "You must provide .Values.provider.tls.caBundle" .Values.provider.tls.caBundle }}
