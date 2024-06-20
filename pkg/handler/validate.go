@@ -60,6 +60,7 @@ func validate(w http.ResponseWriter, req *http.Request) {
 	tufClient, err := createTufClient(tufOutputPath)
 	if err != nil {
 		utils.SendResponse(nil, err.Error(), w)
+		return
 	}
 
 	for _, key := range providerRequest.Request.Keys {
@@ -68,6 +69,7 @@ func validate(w http.ResponseWriter, req *http.Request) {
 		resolver, err := oci.NewRegistryAttestationResolver(key, platform)
 		if err != nil {
 			utils.SendResponse(nil, err.Error(), w)
+			return
 		}
 
 		// configure policy options
@@ -84,6 +86,7 @@ func validate(w http.ResponseWriter, req *http.Request) {
 		result, err := attest.Verify(ctx, opts, resolver)
 		if err != nil {
 			utils.SendResponse(nil, err.Error(), w)
+			return
 		}
 		switch result.Outcome {
 		case attest.OutcomeSuccess:
