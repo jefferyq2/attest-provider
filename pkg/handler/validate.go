@@ -64,7 +64,6 @@ func validate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	for _, key := range providerRequest.Request.Keys {
-		// create a resolver for remote attestations
 		platform := "linux/amd64"
 		resolver, err := oci.NewRegistryAttestationResolver(key, platform)
 		if err != nil {
@@ -72,14 +71,12 @@ func validate(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// configure policy options
 		opts := &policy.PolicyOptions{
 			TufClient:       tufClient,
 			LocalTargetsDir: filepath.Join("/tuf_temp", ".docker", "policy"), // location to store policy files downloaded from TUF
 			LocalPolicyDir:  "",                                              // overrides TUF policy for local policy files if set
 		}
 
-		// verify attestations
 		ctx := req.Context()
 		debug := true
 		ctx = policy.WithPolicyEvaluator(ctx, policy.NewRegoEvaluator(debug))
@@ -88,26 +85,16 @@ func validate(w http.ResponseWriter, req *http.Request) {
 			utils.SendResponse(nil, err.Error(), w)
 			return
 		}
-		switch result.Outcome {
-		case attest.OutcomeSuccess:
-			klog.Info("policy passed")
-			results = append(results, externaldata.Item{
-				Key:   key,
-				Value: "admit: true, message: policy passed",
-			})
-		case attest.OutcomeFailure:
-			klog.Info("policy failed")
-			results = append(results, externaldata.Item{
-				Key:   key,
-				Error: "admit: false, error: policy failed",
-			})
-		case attest.OutcomeNoPolicy:
-			klog.Infof("no policy for image")
-			results = append(results, externaldata.Item{
-				Key:   key,
-				Value: "admit: true, message: no policy",
-			})
-		}
+
+		results = append(results, externaldata.Item{
+			Key: key,
+			Value: ValidationResult{
+				Outcome:    result.Outcome,
+				Input:      result.Input,
+				VSA:        result.VSA,
+				Violations: result.Violations,
+			},
+		})
 	}
 	utils.SendResponse(&results, "", w)
 }

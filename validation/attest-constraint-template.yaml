@@ -12,24 +12,38 @@ spec:
       rego: |
         package k8sexternaldata
 
-        violation[{"msg": msg}] {
+        external_data_response := response {
           # build a list of keys containing images
           images := [img | img = input.review.object.spec.containers[_].image]
 
           # send external data request
           response := external_data({"provider": "attest-provider-validate", "keys": images})
-
-          response_with_error(response)
-
-          msg := sprintf("invalid response: %v", [response])
         }
 
-        response_with_error(response) {
+        violation[{"msg": msg}] {
+          errs := response_with_error(external_data_response)
+
+          msg := sprintf("invalid response: %v", [errs])
+        }
+
+        violation[{"msg": msg}] {
+          response := external_data_response.responses[_]
+          # a response is a list: [key, result, error]
+          image := response[0]
+          result := response[1]
+
+          # here we could also check for no_policy if we wanted to fail closed if there is no policy for this image
+          result.outcome == "failure"
+
+          msg := sprintf("policy failure for image %v:\n%v", [image, yaml.marshal({"violations": result.violations})])
+        }
+
+        response_with_error(response) := errs {
           count(response.errors) > 0
-          errs := response.errors[_]
-          contains(errs[i], "admit: false")
+          errs := response.errors
         }
 
-        response_with_error(response) {
+        response_with_error(response) := errs {
           count(response.system_error) > 0
+          errs := response.system_error
         }
