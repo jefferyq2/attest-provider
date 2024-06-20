@@ -17,7 +17,7 @@ spec:
           images := [img | img = input.review.object.spec.containers[_].image]
 
           # send external data request
-          response := external_data({"provider": "attest-provider", "keys": images})
+          response := external_data({"provider": "attest-provider-validate", "keys": images})
 
           response_with_error(response)
 

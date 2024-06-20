@@ -4,6 +4,8 @@ go 1.22.1
 
 require (
 	github.com/docker/attest v0.1.5-0.20240618150600-86878482c3d9
+	github.com/google/go-containerregistry v0.19.2
+	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/open-policy-agent/frameworks/constraint v0.0.0-20221214024800-b745745c4118
 	k8s.io/klog/v2 v2.120.1
 )
@@ -64,14 +66,12 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/certificate-transparency-go v1.1.8 // indirect
-	github.com/google/go-containerregistry v0.19.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.6 // indirect
 	github.com/hashicorp/hcl v1.0.1-vault-5 // indirect
-	github.com/in-toto/in-toto-golang v0.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jedisct1/go-minisign v0.0.0-20230811132847-661be99b8267 // indirect
 	github.com/jellydator/ttlcache/v3 v3.2.0 // indirect

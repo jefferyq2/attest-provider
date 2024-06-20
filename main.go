@@ -46,7 +46,8 @@ func init() {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("POST /", http.TimeoutHandler(handler.Handler(), handlerTimeout, timeoutError))
+	mux.Handle("POST /validate", http.TimeoutHandler(handler.Validate(), handlerTimeout, timeoutError))
+	mux.Handle("POST /mutate", http.TimeoutHandler(handler.Mutate(), handlerTimeout, timeoutError))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
