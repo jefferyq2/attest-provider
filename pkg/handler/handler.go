@@ -60,9 +60,9 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	for _, key := range providerRequest.Request.Keys {
 		// create a resolver for remote attestations
 		platform := "linux/amd64"
-		resolver := &oci.RegistryResolver{
-			Image:    key,      // path to image index in OCI registry containing image attestations
-			Platform: platform, // platform of subject image (image that attestations are being verified against)
+		resolver, err := oci.NewRegistryAttestationResolver(key, platform)
+		if err != nil {
+			utils.SendResponse(nil, err.Error(), w)
 		}
 
 		// configure policy options
@@ -76,29 +76,30 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		debug := true
 		ctx = policy.WithPolicyEvaluator(ctx, policy.NewRegoEvaluator(debug))
-		policy, err := attest.Verify(ctx, opts, resolver)
+		result, err := attest.Verify(ctx, opts, resolver)
 		if err != nil {
-			results = append(results, externaldata.Item{
-				Key:   key,
-				Error: "admit: false, error: " + err.Error(),
-			})
-			continue
+			utils.SendResponse(nil, err.Error(), w)
 		}
-		if policy {
-			klog.Infof("policy passed: %v\n", policy)
-			// valid key will have "_valid" appended as return value
+		switch result.Outcome {
+		case attest.OutcomeSuccess:
+			klog.Info("policy passed")
 			results = append(results, externaldata.Item{
 				Key:   key,
 				Value: "admit: true, message: policy passed",
 			})
-			continue // passed policy
+		case attest.OutcomeFailure:
+			klog.Info("policy failed")
+			results = append(results, externaldata.Item{
+				Key:   key,
+				Error: "admit: false, error: policy failed",
+			})
+		case attest.OutcomeNoPolicy:
+			klog.Infof("no policy for image")
+			results = append(results, externaldata.Item{
+				Key:   key,
+				Value: "admit: true, message: no policy",
+			})
 		}
-		// no policy found for image
-		klog.Infof("no policy for image")
-		results = append(results, externaldata.Item{
-			Key:   key,
-			Value: "admit: true, message: no policy",
-		})
 	}
 	utils.SendResponse(&results, "", w)
 }
@@ -111,5 +112,5 @@ func createTufClient(outputPath string) (*tuf.TufClient, error) {
 	// metadataURI := "https://docker.github.io/tuf-staging/metadata"
 	// targetsURI := "https://docker.github.io/tuf-staging/targets"
 
-	return tuf.NewTufClient(embed.StagingRoot, outputPath, metadataURI, targetsURI)
+	return tuf.NewTufClient(embed.StagingRoot, outputPath, metadataURI, targetsURI, tuf.NewVersionChecker())
 }
