@@ -37,7 +37,7 @@ teardown_file() {
   run kubectl run nginx --image=nginx -n test --dry-run=server
   # should deny pod admission if the image doesn't pass policy
   assert_failure
-  assert_match 'admit: false' "${output}"
+  assert_match 'type: missing_attestation' "${output}"
 }
 
 # TODO: write mutating webhook policy
