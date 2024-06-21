@@ -65,7 +65,7 @@ func validate(w http.ResponseWriter, req *http.Request) {
 
 	for _, key := range providerRequest.Request.Keys {
 		platform := "linux/amd64"
-		resolver, err := oci.NewRegistryAttestationResolver(key, platform)
+		src, err := oci.ParseImageSpec(key, oci.WithPlatform(platform))
 		if err != nil {
 			utils.SendResponse(nil, err.Error(), w)
 			return
@@ -80,7 +80,7 @@ func validate(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		debug := true
 		ctx = policy.WithPolicyEvaluator(ctx, policy.NewRegoEvaluator(debug))
-		result, err := attest.Verify(ctx, opts, resolver)
+		result, err := attest.Verify(ctx, src, opts)
 		if err != nil {
 			utils.SendResponse(nil, err.Error(), w)
 			return

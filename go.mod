@@ -3,7 +3,7 @@ module github.com/open-policy-agent/gatekeeper-external-data-provider
 go 1.22.1
 
 require (
-	github.com/docker/attest v0.1.5-0.20240618150600-86878482c3d9
+	github.com/docker/attest v0.1.5
 	github.com/google/go-containerregistry v0.19.2
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/open-policy-agent/frameworks/constraint v0.0.0-20221214024800-b745745c4118
