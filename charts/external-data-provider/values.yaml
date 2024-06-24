@@ -1,9 +1,12 @@
 certDir: /certs
 clientCAFile: /tmp/gatekeeper/ca.crt
 port: 8090
-tufRoot: dev
-tufMetadataSource: https://docker.github.io/tuf-dev/metadata
-tufTargetsSource: https://docker.github.io/tuf-dev/targets
+
+# uncomment these lines to use the dev TUF root
+# tufRoot: dev
+# tufMetadataSource: https://docker.github.io/tuf-dev/metadata
+# tufTargetsSource: https://docker.github.io/tuf-dev/targets
+
 provider:
   timeout: 30
   tls:
