@@ -15,11 +15,13 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func Mutate() http.Handler {
-	return http.HandlerFunc(mutate)
+type mutateHandler struct{}
+
+func NewMutateHandler() (http.Handler, error) {
+	return &mutateHandler{}, nil
 }
 
-func mutate(w http.ResponseWriter, req *http.Request) {
+func (h *mutateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
 			klog.Error(string(debug.Stack()))
