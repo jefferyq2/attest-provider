@@ -25,6 +25,22 @@ spec:
         - --client-ca-file={{ .Values.clientCAFile }}
         {{- end }}
         - --port={{ .Values.port }}
+        {{- if .Values.tufRoot }}
+        - --tuf-root={{ .Values.tufRoot }}
+        {{- end }}
+        {{- if .Values.tufMetadataSource }}
+        - --tuf-metadata-source={{ .Values.tufMetadataSource }}
+        {{- end }}
+        {{- if .Values.tufTargetsSource }}
+        - --tuf-targets-source={{ .Values.tufTargetsSource }}
+        {{- end }}
+        {{- if .Values.localPolicyDir }}
+        - --local-policy-dir={{ .Values.localPolicyDir }}
+        {{- end }}
+        {{- if .Values.policyCacheDir }}
+        - --policy-cache-dir={{ .Values.policyCacheDir }}
+        {{- end }}
+
         ports:
         - containerPort: {{ .Values.port }}
           protocol: TCP

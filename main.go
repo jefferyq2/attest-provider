@@ -32,6 +32,24 @@ var (
 	certDir      string
 	clientCAFile string
 	port         int
+
+	tufRoot       string
+	tufoutputPath string
+	metadataURL   string
+	targetsURL    string
+
+	policyDir      string
+	policyCacheDir string
+)
+
+const (
+	defaultMetadataURL = "registry-1.docker.io/docker/tuf-metadata:latest"
+	defaultTargetsURL  = "registry-1.docker.io/docker/tuf-targets"
+)
+
+var (
+	defaultTUFOutputPath  = filepath.Join("/tuf_temp", ".docker", "tuf")
+	defaultPolicyCacheDir = filepath.Join("/tuf_temp", ".docker", "policy")
 )
 
 var timeoutError = string(utils.GatekeeperError("operation timed out"))
@@ -41,13 +59,47 @@ func init() {
 	flag.StringVar(&certDir, "cert-dir", "", "path to directory containing TLS certificates")
 	flag.StringVar(&clientCAFile, "client-ca-file", "", "path to client CA certificate")
 	flag.IntVar(&port, "port", defaultPort, "Port for the server to listen on")
+	flag.StringVar(&tufRoot, "tuf-root", "staging", "specify embedded tuf root [dev, staging], default [staging]")
+
+	if tufRoot != "dev" && tufRoot != "staging" {
+		klog.Errorf("invalid tuf root: %s", tufRoot)
+		os.Exit(1)
+	}
+
+	flag.StringVar(&metadataURL, "tuf-metadata-source", defaultMetadataURL, "source (URL or repo) for TUF metadata")
+	flag.StringVar(&targetsURL, "tuf-targets-source", defaultTargetsURL, "source (URL or repo) for TUF targets")
+	flag.StringVar(&tufoutputPath, "tuf-output-path", defaultTUFOutputPath, "local dir to store TUF repo metadata")
+
+	flag.StringVar(&policyDir, "local-policy-dir", "", "path to local policy directory (overrides TUF policy)")
+	flag.StringVar(&policyCacheDir, "policy-cache-dir", defaultPolicyCacheDir, "path to store policy downloaded from TUF")
+
 	flag.Parse()
 }
 
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("POST /validate", http.TimeoutHandler(handler.Validate(), handlerTimeout, timeoutError))
-	mux.Handle("POST /mutate", http.TimeoutHandler(handler.Mutate(), handlerTimeout, timeoutError))
+
+	validateHandler, err := handler.NewValidateHandler(&handler.ValidateHandlerOptions{
+		TUFRoot:        tufRoot,
+		TUFOutputPath:  tufoutputPath,
+		TUFMetadataURL: metadataURL,
+		TUFTargetsURL:  targetsURL,
+		PolicyDir:      policyDir,
+		PolicyCacheDir: policyCacheDir,
+	})
+	if err != nil {
+		klog.ErrorS(err, "unable to create validate handler")
+		os.Exit(1)
+	}
+
+	mutateHandler, err := handler.NewMutateHandler()
+	if err != nil {
+		klog.ErrorS(err, "unable to create validate handler")
+		os.Exit(1)
+	}
+
+	mux.Handle("POST /validate", http.TimeoutHandler(validateHandler, handlerTimeout, timeoutError))
+	mux.Handle("POST /mutate", http.TimeoutHandler(mutateHandler, handlerTimeout, timeoutError))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
