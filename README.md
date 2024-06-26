@@ -38,8 +38,8 @@ helm install gatekeeper/gatekeeper \
 3. Build and deploy the external data provider.
 
 ```bash
-git clone https://github.com/docker/attest-external-data-provider.git
-cd attest-external-data-provider
+git clone https://github.com/docker/attest-provider.git
+cd attest-provider
 
 # if you are not planning to establish mTLS between the provider and Gatekeeper,
 # deploy the provider to a separate namespace. Otherwise, do not run the following command

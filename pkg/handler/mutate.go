@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	"github.com/docker/attest-provider/pkg/utils"
 	"github.com/docker/attest/pkg/oci"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/open-policy-agent/frameworks/constraint/pkg/externaldata"
-	"github.com/open-policy-agent/gatekeeper-external-data-provider/pkg/utils"
 	"k8s.io/klog/v2"
 )
 

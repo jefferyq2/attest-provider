@@ -8,7 +8,7 @@ ARG LDFLAGS
 ENV GO111MODULE=on \
   CGO_ENABLED=0
 
-WORKDIR /go/src/github.com/docker/attest-external-data-provider
+WORKDIR /src/attest-provider
 
 COPY . .
 
@@ -29,10 +29,10 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/root/.c
 
 FROM ${BASEIMAGE}
 
-COPY --from=builder /go/src/github.com/docker/attest-external-data-provider/bin/attest /
+COPY --from=builder /src/attest-provider/bin/attest /
 
-COPY --from=builder --chown=65532:65532 /go/src/github.com/docker/attest-external-data-provider/certs/tls.crt \
-  /go/src/github.com/docker/attest-external-data-provider/certs/tls.key \
+COPY --from=builder --chown=65532:65532 /src/attest-provider/certs/tls.crt \
+  /src/attest-provider/certs/tls.key \
   /certs/
 
 USER 65532:65532
