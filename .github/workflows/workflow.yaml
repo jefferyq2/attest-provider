@@ -30,7 +30,7 @@ jobs:
         with:
           app-id: ${{ vars.DOCKER_READ_APP_ID }}
           private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
-          repositories: "attest,attest-provider"
+          repositories: "attest,attest-external-data-provider"
 
       - name: Set up Go 1.22
         uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
@@ -78,7 +78,7 @@ jobs:
         with:
           app-id: ${{ vars.DOCKER_READ_APP_ID }}
           private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
-          repositories: "attest,attest-provider"
+          repositories: "attest,attest-external-data-provider"
 
       - name: Bootstrap e2e
         env:
