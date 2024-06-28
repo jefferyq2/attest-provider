@@ -2,7 +2,7 @@ apiVersion: v2
 description: A Helm chart for attest external data provider
 name: attest-provider
 version: 0.0.1
-home: https://github.com/docker/attest-external-data-provider
+home: https://github.com/docker/attest-provider
 sources:
-  - https://github.com/docker/attest-external-data-provider.git
+  - https://github.com/docker/attest-provider.git
 appVersion: 0.0.1
