@@ -107,7 +107,7 @@ jobs:
             --create-namespace \
             --debug
 
-      - name: Build and install attest-external-data-provider
+      - name: Build and install attest-provider
         run: |
           ./scripts/generate-tls-cert.sh
           export GITHUB_TOKEN=${{ steps.app-token.outputs.token }}

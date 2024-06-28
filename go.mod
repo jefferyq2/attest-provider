@@ -1,4 +1,4 @@
-module github.com/open-policy-agent/gatekeeper-external-data-provider
+module github.com/docker/attest-provider
 
 go 1.22.1
 

@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	"github.com/docker/attest-provider/internal/embed"
+	"github.com/docker/attest-provider/pkg/utils"
 	"github.com/docker/attest/pkg/attest"
 	"github.com/docker/attest/pkg/oci"
 	"github.com/docker/attest/pkg/policy"
 	"github.com/docker/attest/pkg/tuf"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 	"github.com/open-policy-agent/frameworks/constraint/pkg/externaldata"
-	"github.com/open-policy-agent/gatekeeper-external-data-provider/internal/embed"
-	"github.com/open-policy-agent/gatekeeper-external-data-provider/pkg/utils"
 	"k8s.io/klog/v2"
 )
 

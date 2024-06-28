@@ -7,6 +7,9 @@ port: 8090
 # tufMetadataSource: https://docker.github.io/tuf-dev/metadata
 # tufTargetsSource: https://docker.github.io/tuf-dev/targets
 
+tufMetadataSource: https://docker.github.io/tuf-staging/metadata
+tufTargetsSource: https://docker.github.io/tuf-staging/targets
+
 provider:
   timeout: 30
   tls:

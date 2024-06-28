@@ -1,4 +1,4 @@
-REPOSITORY ?= docker/attest-external-data-provider
+REPOSITORY ?= docker/attest-provider
 IMG := $(REPOSITORY):dev
 
 # When updating this, make sure to update the corresponding action in

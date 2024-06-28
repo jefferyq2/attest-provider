@@ -14,7 +14,7 @@ spec:
         run: attest-provider
     spec:
       containers:
-      - image: docker/attest-external-data-provider:dev
+      - image: docker/attest-provider:dev
         imagePullPolicy: IfNotPresent
         name: attest-provider
         securityContext:
