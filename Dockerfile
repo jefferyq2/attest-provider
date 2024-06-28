@@ -8,7 +8,7 @@ ARG LDFLAGS
 ENV GO111MODULE=on \
   CGO_ENABLED=0
 
-WORKDIR /src/attest-provider
+WORKDIR /app
 
 COPY . .
 
@@ -29,11 +29,9 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/root/.c
 
 FROM ${BASEIMAGE}
 
-COPY --from=builder /src/attest-provider/bin/attest /
+COPY --from=builder /app/bin/attest /
 
-COPY --from=builder --chown=65532:65532 /src/attest-provider/certs/tls.crt \
-  /src/attest-provider/certs/tls.key \
-  /certs/
+COPY --from=builder --chown=65532:65532 /app/certs/tls.crt /app/certs/tls.key /certs/
 
 USER 65532:65532
 
