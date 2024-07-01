@@ -34,4 +34,4 @@ ENTRYPOINT ["/attest"]
 
 FROM production AS dev
 
-COPY certs/tls.crt certs/tls.key /certs/
+COPY --chown=65532:65532 certs/tls.crt certs/tls.key /certs/
