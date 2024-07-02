@@ -14,7 +14,7 @@ spec:
         run: attest-provider
     spec:
       containers:
-      - image: docker/attest-provider:dev
+      - image: {{ .Values.image }}
         imagePullPolicy: IfNotPresent
         name: attest-provider
         securityContext:
