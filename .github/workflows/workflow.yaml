@@ -112,7 +112,7 @@ jobs:
           ./scripts/generate-tls-cert.sh
           export GITHUB_TOKEN=${{ steps.app-token.outputs.token }}
           make docker-buildx kind-load-image
-          helm install attest-provider charts/external-data-provider \
+          helm install attest-provider charts/attest-provider \
             --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
             --namespace security \
             --wait --debug
