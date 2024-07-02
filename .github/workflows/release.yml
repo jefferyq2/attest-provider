@@ -21,7 +21,7 @@ jobs:
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
-          repositories: "attest"
+          repositories: "attest,attest-provider"
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
