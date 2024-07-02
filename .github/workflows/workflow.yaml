@@ -114,6 +114,7 @@ jobs:
           make docker-buildx kind-load-image
           helm install attest-provider charts/attest-provider \
             --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
+            --set image="docker/attest-provider:dev" \
             --namespace security \
             --wait --debug
 
