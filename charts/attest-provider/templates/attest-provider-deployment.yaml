@@ -14,7 +14,7 @@ spec:
         run: attest-provider
     spec:
       containers:
-      - image: docker/attest-provider:dev
+      - image: {{ .Values.image }}
         imagePullPolicy: IfNotPresent
         name: attest-provider
         securityContext:
@@ -52,6 +52,11 @@ spec:
           mountPath: /tmp/gatekeeper
           readOnly: true
         {{- end }}
+        {{- if .Values.certSecret }}
+        - name: tls-cert-key
+          mountPath: {{ .Values.certDir }}
+          readOnly: true
+        {{- end }}
       restartPolicy: Always
       nodeSelector:
         kubernetes.io/os: linux
@@ -65,4 +70,14 @@ spec:
           items:
           - key: ca.crt
             path: ca.crt
+      {{- end }}
+      {{- if .Values.certSecret }}
+      - name: tls-cert-key
+        secret:
+          secretName: {{ .Values.certSecret }}
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key
       {{- end }}
