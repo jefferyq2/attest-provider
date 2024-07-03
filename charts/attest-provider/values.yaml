@@ -3,6 +3,7 @@ image: "docker/attest-provider:0.0.3@sha256:7a86f674235cae3f7fa0691ae56d385b2b13
 certDir: /certs
 clientCAFile: /tmp/gatekeeper/ca.crt
 port: 8090
+replicas: 1
 
 # uncomment these lines to use the dev TUF root
 # tufRoot: dev
