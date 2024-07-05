@@ -70,8 +70,8 @@ spec:
         emptyDir: {}
       {{- if .Values.localPolicyDir }}
       - name: local-policy
-        secret:
-          configMap: {{ .Values.localPolicyConfigMap }}
+        configMap:
+          name: {{ .Values.localPolicyConfigMap }}
       {{- end }}
       {{- if .Values.clientCAFile }}
       - name: gatekeeper-ca-cert
