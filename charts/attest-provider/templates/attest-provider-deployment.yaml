@@ -47,6 +47,11 @@ spec:
         volumeMounts:
         - name: tuf-temp
           mountPath: /tuf_temp
+        {{- if .Values.localPolicyDir }}
+        - name: local-policy
+          mountPath: {{ .Values.localPolicyDir }}
+          readOnly: true
+        {{- end }}
         {{- if .Values.clientCAFile }}
         - name: gatekeeper-ca-cert
           mountPath: /tmp/gatekeeper
@@ -63,6 +68,11 @@ spec:
       volumes:
       - name: tuf-temp
         emptyDir: {}
+      {{- if .Values.localPolicyDir }}
+      - name: local-policy
+        secret:
+          configMap: {{ .Values.localPolicyConfigMap }}
+      {{- end }}
       {{- if .Values.clientCAFile }}
       - name: gatekeeper-ca-cert
         secret:
