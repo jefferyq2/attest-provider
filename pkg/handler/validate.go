@@ -10,6 +10,7 @@ import (
 	"github.com/docker/attest-provider/internal/embed"
 	"github.com/docker/attest-provider/pkg/utils"
 	"github.com/docker/attest/pkg/attest"
+	"github.com/docker/attest/pkg/config"
 	"github.com/docker/attest/pkg/oci"
 	"github.com/docker/attest/pkg/policy"
 	"github.com/docker/attest/pkg/tuf"
@@ -33,6 +34,9 @@ type ValidateHandlerOptions struct {
 
 	PolicyDir      string
 	PolicyCacheDir string
+
+	AttestationStyle string
+	ReferrersRepo    string
 }
 
 type validateHandler struct {
@@ -104,9 +108,11 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	policyOpts := &policy.PolicyOptions{
-		TufClient:       tufClient,
-		LocalTargetsDir: h.opts.PolicyCacheDir,
-		LocalPolicyDir:  h.opts.PolicyDir,
+		TufClient:        tufClient,
+		LocalTargetsDir:  h.opts.PolicyCacheDir,
+		LocalPolicyDir:   h.opts.PolicyDir,
+		AttestationStyle: config.AttestationStyle(h.opts.AttestationStyle),
+		ReferrersRepo:    h.opts.ReferrersRepo,
 	}
 
 	results := make([]externaldata.Item, 0)

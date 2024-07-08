@@ -40,6 +40,9 @@ var (
 
 	policyDir      string
 	policyCacheDir string
+
+	attestationStyle string
+	referrersRepo    string
 )
 
 const (
@@ -73,6 +76,9 @@ func init() {
 	flag.StringVar(&policyDir, "local-policy-dir", "", "path to local policy directory (overrides TUF policy)")
 	flag.StringVar(&policyCacheDir, "policy-cache-dir", defaultPolicyCacheDir, "path to store policy downloaded from TUF")
 
+	flag.StringVar(&attestationStyle, "attestation-style", "referrers", "attestation style [referrers, attached]")
+	flag.StringVar(&referrersRepo, "referrers-source", "", "repo from which to fetch Referrers for attestation lookup")
+
 	flag.Parse()
 }
 
@@ -80,12 +86,14 @@ func main() {
 	mux := http.NewServeMux()
 
 	validateHandler, err := handler.NewValidateHandler(&handler.ValidateHandlerOptions{
-		TUFRoot:        tufRoot,
-		TUFOutputPath:  tufoutputPath,
-		TUFMetadataURL: metadataURL,
-		TUFTargetsURL:  targetsURL,
-		PolicyDir:      policyDir,
-		PolicyCacheDir: policyCacheDir,
+		TUFRoot:          tufRoot,
+		TUFOutputPath:    tufoutputPath,
+		TUFMetadataURL:   metadataURL,
+		TUFTargetsURL:    targetsURL,
+		PolicyDir:        policyDir,
+		PolicyCacheDir:   policyCacheDir,
+		AttestationStyle: attestationStyle,
+		ReferrersRepo:    referrersRepo,
 	})
 	if err != nil {
 		klog.ErrorS(err, "unable to create validate handler")
