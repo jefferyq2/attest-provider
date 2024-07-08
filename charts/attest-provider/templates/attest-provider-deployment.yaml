@@ -40,6 +40,12 @@ spec:
         {{- if .Values.policyCacheDir }}
         - --policy-cache-dir={{ .Values.policyCacheDir }}
         {{- end }}
+        {{- if .Values.attestationStyle }}
+        - --attestation-style={{ .Values.attestationStyle }}
+        {{- end }}
+        {{- if .Values.referrersRepo }}
+        - --referrers-source={{ .Values.referrersRepo }}
+        {{- end }}
 
         ports:
         - containerPort: {{ .Values.port }}

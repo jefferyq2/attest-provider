@@ -1,4 +1,4 @@
-image: "docker/attest-provider:0.0.3@sha256:7a86f674235cae3f7fa0691ae56d385b2b13951c3cf4cb04356d486a6698d354"
+image: "docker/attest-provider:0.0.6@sha256:1403ff1d17ffb9d330e90817ed05d080dec2bd4c9f7e611be07788111040342f"
 
 certDir: /certs
 clientCAFile: /tmp/gatekeeper/ca.crt
@@ -12,6 +12,8 @@ replicas: 1
 
 tufMetadataSource: https://docker.github.io/tuf-staging/metadata
 tufTargetsSource: https://docker.github.io/tuf-staging/targets
+
+attestationStyle: referrers
 
 provider:
   timeout: 30
