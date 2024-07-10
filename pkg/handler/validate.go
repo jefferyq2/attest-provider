@@ -66,6 +66,10 @@ func (h *validateHandler) createTUFClient() (*tuf.TufClient, error) {
 		rootBytes = embed.DevRoot
 	case "staging":
 		rootBytes = embed.StagingRoot
+	case "prod":
+		rootBytes = embed.ProdRoot
+	case "":
+		rootBytes = embed.DefaultRoot
 	default:
 		return nil, fmt.Errorf("invalid tuf root: %s", h.opts.TUFRoot)
 	}

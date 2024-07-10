@@ -62,13 +62,8 @@ func init() {
 	flag.StringVar(&certDir, "cert-dir", "", "path to directory containing TLS certificates")
 	flag.StringVar(&clientCAFile, "client-ca-file", "", "path to client CA certificate")
 	flag.IntVar(&port, "port", defaultPort, "Port for the server to listen on")
-	flag.StringVar(&tufRoot, "tuf-root", "staging", "specify embedded tuf root [dev, staging], default [staging]")
 
-	if tufRoot != "dev" && tufRoot != "staging" {
-		klog.Errorf("invalid tuf root: %s", tufRoot)
-		os.Exit(1)
-	}
-
+	flag.StringVar(&tufRoot, "tuf-root", "prod", "specify embedded tuf root [dev, staging, prod], default [prod]")
 	flag.StringVar(&metadataURL, "tuf-metadata-source", defaultMetadataURL, "source (URL or repo) for TUF metadata")
 	flag.StringVar(&targetsURL, "tuf-targets-source", defaultTargetsURL, "source (URL or repo) for TUF targets")
 	flag.StringVar(&tufoutputPath, "tuf-output-path", defaultTUFOutputPath, "local dir to store TUF repo metadata")
