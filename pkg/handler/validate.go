@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/docker/attest-provider/internal/embed"
 	"github.com/docker/attest-provider/pkg/utils"
 	"github.com/docker/attest/pkg/attest"
 	"github.com/docker/attest/pkg/config"
@@ -60,20 +59,11 @@ func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
 }
 
 func (h *validateHandler) createTUFClient() (*tuf.TufClient, error) {
-	var rootBytes []byte
-	switch h.opts.TUFRoot {
-	case "dev":
-		rootBytes = embed.DevRoot
-	case "staging":
-		rootBytes = embed.StagingRoot
-	case "prod":
-		rootBytes = embed.ProdRoot
-	case "":
-		rootBytes = embed.DefaultRoot
-	default:
-		return nil, fmt.Errorf("invalid tuf root: %s", h.opts.TUFRoot)
+	root, err := tuf.GetEmbeddedTufRoot(h.opts.TUFRoot)
+	if err != nil {
+		return nil, err
 	}
-	return tuf.NewTufClient(rootBytes, h.opts.TUFOutputPath, h.opts.TUFMetadataURL, h.opts.TUFTargetsURL, tuf.NewVersionChecker())
+	return tuf.NewTufClient(root.Data, h.opts.TUFOutputPath, h.opts.TUFMetadataURL, h.opts.TUFTargetsURL, tuf.NewVersionChecker())
 }
 
 func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
