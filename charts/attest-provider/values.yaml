@@ -5,13 +5,18 @@ clientCAFile: /tmp/gatekeeper/ca.crt
 port: 8090
 replicas: 1
 
-# uncomment these lines to use the dev TUF root
+# uncomment these lines to use other TUF root environments
 # tufRoot: dev
 # tufMetadataSource: https://docker.github.io/tuf-dev/metadata
 # tufTargetsSource: https://docker.github.io/tuf-dev/targets
+#
+# tufRoot: staging
+# tufMetadataSource: registry-1.docker.io/docker/tuf-metadata-staging
+# tufTargetsSource: registry-1.docker.io/docker/tuf-targets-staging
 
-tufMetadataSource: https://docker.github.io/tuf-staging/metadata
-tufTargetsSource: https://docker.github.io/tuf-staging/targets
+tufRoot: prod
+tufMetadataSource: registry-1.docker.io/docker/tuf-metadata
+tufTargetsSource: registry-1.docker.io/docker/tuf-targets
 
 attestationStyle: referrers
 
