@@ -55,19 +55,11 @@ make docker-buildx
 # load the image into kind
 make kind-load-image
 
-# Choose one of the following ways to deploy the external data provider:
-
-# 1. client and server auth enabled (recommended)
-helm install attest-provider charts/external-data-provider \
+# deploy attest provider
+helm install attest-provider charts/attest-provider \
     --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
+    --set image="docker/attest-provider:dev" \
     --namespace "${NAMESPACE:-gatekeeper-system}"
-
-# 2. client auth disabled and server auth enabled
-helm install attest-provider charts/external-data-provider \
-    --set clientCAFile="" \
-    --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
-    --namespace "${NAMESPACE:-gatekeeper-system}" \
-    --create-namespace
 ```
 
 4. Install constraint template and constraint.

@@ -101,8 +101,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	readyHandler, err := handler.NewReadyHandler()
+	if err != nil {
+		klog.ErrorS(err, "unable to create ready handler")
+		os.Exit(1)
+	}
+
 	mux.Handle("POST /validate", http.TimeoutHandler(validateHandler, handlerTimeout, timeoutError))
 	mux.Handle("POST /mutate", http.TimeoutHandler(mutateHandler, handlerTimeout, timeoutError))
+	mux.Handle("GET /ready", readyHandler)
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
@@ -125,7 +132,7 @@ func main() {
 		clientCAs.AppendCertsFromPEM(caCert)
 
 		config.ClientCAs = clientCAs
-		config.ClientAuth = tls.RequireAndVerifyClientCert
+		config.ClientAuth = tls.VerifyClientCertIfGiven
 		server.TLSConfig = config
 	}
 
