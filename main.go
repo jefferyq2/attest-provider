@@ -101,15 +101,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	readyHandler, err := handler.NewReadyHandler()
-	if err != nil {
-		klog.ErrorS(err, "unable to create ready handler")
-		os.Exit(1)
-	}
-
 	mux.Handle("POST /validate", http.TimeoutHandler(validateHandler, handlerTimeout, timeoutError))
 	mux.Handle("POST /mutate", http.TimeoutHandler(mutateHandler, handlerTimeout, timeoutError))
-	mux.Handle("GET /ready", readyHandler)
+	mux.Handle("GET /ready", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
