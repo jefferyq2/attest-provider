@@ -68,6 +68,11 @@ spec:
           mountPath: {{ .Values.certDir }}
           readOnly: true
         {{- end }}
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: {{ .Values.port }}
+            scheme: HTTPS
       restartPolicy: Always
       nodeSelector:
         kubernetes.io/os: linux

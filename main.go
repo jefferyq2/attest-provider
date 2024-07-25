@@ -103,6 +103,9 @@ func main() {
 
 	mux.Handle("POST /validate", http.TimeoutHandler(validateHandler, handlerTimeout, timeoutError))
 	mux.Handle("POST /mutate", http.TimeoutHandler(mutateHandler, handlerTimeout, timeoutError))
+	mux.Handle("GET /ready", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
@@ -125,7 +128,7 @@ func main() {
 		clientCAs.AppendCertsFromPEM(caCert)
 
 		config.ClientCAs = clientCAs
-		config.ClientAuth = tls.RequireAndVerifyClientCert
+		config.ClientAuth = tls.VerifyClientCertIfGiven
 		server.TLSConfig = config
 	}
 
