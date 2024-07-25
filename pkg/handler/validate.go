@@ -50,7 +50,10 @@ func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
 	// TODO: this pre-loading works for the root, targets, snapshot, and timestamp roles, but not for delegated roles.
 	_, err := handler.createTUFClient()
 	if err != nil {
-		return nil, err
+		// if this failed, don't return an error, just log it and continue
+		// this prevents the server from getting into a crash loop if the TUF repo is down or broken,
+		// and we can still recover if the TUF repo comes back up.
+		klog.ErrorS(err, "failed to initialize TUF client")
 	}
 
 	klog.Infof("validate handler initialized with %s TUF root", opts.TUFRoot)
