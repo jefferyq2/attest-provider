@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         run: attest-provider
+        app: '{{ template "attest-provider.name" . }}'
+        chart: '{{ template "attest-provider.name" . }}'
     spec:
       containers:
       - image: {{ .Values.image }}
@@ -27,6 +29,9 @@ spec:
         - --port={{ .Values.port }}
         {{- if .Values.tufRoot }}
         - --tuf-root={{ .Values.tufRoot }}
+        {{- end }}
+        {{- if .Values.handlerTimeout }}
+        - --handler-timeout={{ .Values.handlerTimeout }}
         {{- end }}
         {{- if .Values.tufMetadataSource }}
         - --tuf-metadata-source={{ .Values.tufMetadataSource }}
