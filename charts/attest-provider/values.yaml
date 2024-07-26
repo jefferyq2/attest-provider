@@ -1,8 +1,9 @@
-image: "docker/attest-provider:0.0.7@sha256:8542dbb19c9dc2f1137e842710ac8697e734341f02450bb2b47948fb99df819a"
+image: "docker/attest-provider:0.0.8@sha256:ad61961bbb9779822e8627c9ddb5c2f29c1ece4ecf9577fb81df02eb108a59ef"
 
 certDir: /certs
 clientCAFile: /tmp/gatekeeper/ca.crt
 port: 8090
+handlerTimeout: 25
 replicas: 1
 
 # uncomment these lines to use other TUF root environments
