@@ -17,7 +17,6 @@ import (
 )
 
 const (
-	handlerTimeout    = 15 * time.Second
 	readHeaderTimeout = 1 * time.Second
 )
 
@@ -29,9 +28,10 @@ const (
 )
 
 var (
-	certDir      string
-	clientCAFile string
-	port         int
+	certDir               string
+	clientCAFile          string
+	port                  int
+	handlerTimeoutSeconds int
 
 	tufRoot       string
 	tufoutputPath string
@@ -62,6 +62,7 @@ func init() {
 	flag.StringVar(&certDir, "cert-dir", "", "path to directory containing TLS certificates")
 	flag.StringVar(&clientCAFile, "client-ca-file", "", "path to client CA certificate")
 	flag.IntVar(&port, "port", defaultPort, "Port for the server to listen on")
+	flag.IntVar(&handlerTimeoutSeconds, "handler-timeout", 25, "timeout for handler in seconds")
 
 	flag.StringVar(&tufRoot, "tuf-root", "prod", "specify embedded tuf root [dev, staging, prod], default [prod]")
 	flag.StringVar(&metadataURL, "tuf-metadata-source", defaultMetadataURL, "source (URL or repo) for TUF metadata")
@@ -79,6 +80,7 @@ func init() {
 
 func main() {
 	mux := http.NewServeMux()
+	handlerTimeout := time.Duration(handlerTimeoutSeconds) * time.Second
 
 	validateHandler, err := handler.NewValidateHandler(&handler.ValidateHandlerOptions{
 		TUFRoot:          tufRoot,
@@ -103,6 +105,9 @@ func main() {
 
 	mux.Handle("POST /validate", http.TimeoutHandler(validateHandler, handlerTimeout, timeoutError))
 	mux.Handle("POST /mutate", http.TimeoutHandler(mutateHandler, handlerTimeout, timeoutError))
+	mux.Handle("GET /ready", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
@@ -125,7 +130,7 @@ func main() {
 		clientCAs.AppendCertsFromPEM(caCert)
 
 		config.ClientCAs = clientCAs
-		config.ClientAuth = tls.RequireAndVerifyClientCert
+		config.ClientAuth = tls.VerifyClientCertIfGiven
 		server.TLSConfig = config
 	}
 
