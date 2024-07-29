@@ -26,8 +26,10 @@ helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 # Install the latest version of Gatekeeper with the external data feature enabled.
 helm install gatekeeper/gatekeeper \
     --set enableExternalData=true \
+    --set emitAdmissionEvents=true \
+    --set emitAuditEvents=true \
     --set validatingWebhookFailurePolicy=Fail \
-    --set validatingWebhookTimeoutSeconds=30 \
+    --set validatingWebhookTimeoutSeconds=10 \
     --set postInstall.probeWebhook.enabled=false \
     --set postInstall.labelNamespace.enabled=false \
     --name-template=gatekeeper \
