@@ -19,10 +19,10 @@ import (
 )
 
 type ValidationResult struct {
-	Outcome    attest.Outcome      `json:"outcome"`
-	Input      *policy.PolicyInput `json:"input"`
-	VSA        *intoto.Statement   `json:"vsa"`
-	Violations []policy.Violation  `json:"violations"`
+	Outcome    attest.Outcome     `json:"outcome"`
+	Input      *policy.Input      `json:"input"`
+	VSA        *intoto.Statement  `json:"vsa"`
+	Violations []policy.Violation `json:"violations"`
 }
 
 type ValidateHandlerOptions struct {
@@ -61,12 +61,12 @@ func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
 	return handler, nil
 }
 
-func (h *validateHandler) createTUFClient() (*tuf.TufClient, error) {
-	root, err := tuf.GetEmbeddedTufRoot(h.opts.TUFRoot)
+func (h *validateHandler) createTUFClient() (*tuf.Client, error) {
+	root, err := tuf.GetEmbeddedRoot(h.opts.TUFRoot)
 	if err != nil {
 		return nil, err
 	}
-	return tuf.NewTufClient(root.Data, h.opts.TUFOutputPath, h.opts.TUFMetadataURL, h.opts.TUFTargetsURL, tuf.NewVersionChecker())
+	return tuf.NewClient(root.Data, h.opts.TUFOutputPath, h.opts.TUFMetadataURL, h.opts.TUFTargetsURL, tuf.NewDefaultVersionChecker())
 }
 
 func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -104,8 +104,8 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	policyOpts := &policy.PolicyOptions{
-		TufClient:        tufClient,
+	policyOpts := &policy.Options{
+		TUFClient:        tufClient,
 		LocalTargetsDir:  h.opts.PolicyCacheDir,
 		LocalPolicyDir:   h.opts.PolicyDir,
 		AttestationStyle: config.AttestationStyle(h.opts.AttestationStyle),
