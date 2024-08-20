@@ -15,6 +15,9 @@ spec:
         app: '{{ template "attest-provider.name" . }}'
         chart: '{{ template "attest-provider.name" . }}'
     spec:
+      {{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      {{- end }}
       containers:
       - image: {{ .Values.image }}
         imagePullPolicy: IfNotPresent
