@@ -8,6 +8,7 @@
 |port|port for provider service|`8090`|
 |handlerTimeout|timeout in seconds for provider HTTP handler|`25`|
 |replicas|number of provider replicas in deployment|`1`|
+|serviceAccountName|name of service account to attach to provider pods|``|
 |tufRoot|name of embedded Docker TUF root to use for client (`dev`, `staging`, `prod`)|`prod`|
 |tufMetadataSource|URI for TUF metadata (registry or http source)|`registry-1.docker.io/docker/tuf-metadata`|
 |tufTargetsSource|URI for TUF targets (registry or http source)|`registry-1.docker.io/docker/tuf-targets`|
