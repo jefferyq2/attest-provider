@@ -22,3 +22,4 @@ certs/
 
 # binary output
 bin/
+.vscode/

@@ -48,7 +48,7 @@ func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
 	// a TUF client can only be used once, so we need to create a new one for each request.
 	// we create this one up front to ensure that the TUF root is valid and to pre-load the metadata.
 	// TODO: this pre-loading works for the root, targets, snapshot, and timestamp roles, but not for delegated roles.
-	_, err := handler.createTUFClient()
+	_, err := handler.newVerifier()
 	if err != nil {
 		// if this failed, don't return an error, just log it and continue
 		// this prevents the server from getting into a crash loop if the TUF repo is down or broken,
@@ -61,12 +61,31 @@ func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
 	return handler, nil
 }
 
-func (h *validateHandler) createTUFClient() (*tuf.Client, error) {
+func (h *validateHandler) newVerifier() (attest.Verifier, error) {
 	root, err := tuf.GetEmbeddedRoot(h.opts.TUFRoot)
 	if err != nil {
 		return nil, err
 	}
-	return tuf.NewClient(root.Data, h.opts.TUFOutputPath, h.opts.TUFMetadataURL, h.opts.TUFTargetsURL, tuf.NewDefaultVersionChecker())
+
+	policyOpts := &policy.Options{
+		TUFClientOptions: &tuf.ClientOptions{
+			InitialRoot:    root.Data,
+			Path:           h.opts.TUFOutputPath,
+			MetadataSource: h.opts.TUFMetadataURL,
+			TargetsSource:  h.opts.TUFTargetsURL,
+			VersionChecker: tuf.NewDefaultVersionChecker(),
+		},
+		LocalTargetsDir:  h.opts.PolicyCacheDir,
+		LocalPolicyDir:   h.opts.PolicyDir,
+		AttestationStyle: config.AttestationStyle(h.opts.AttestationStyle),
+		ReferrersRepo:    h.opts.ReferrersRepo,
+		Debug:            true,
+	}
+	verifier, err := attest.NewVerifier(policyOpts)
+	if err != nil {
+		return nil, err
+	}
+	return verifier, nil
 }
 
 func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -78,8 +97,6 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}()
 
 	ctx := req.Context()
-	debug := true
-	ctx = policy.WithPolicyEvaluator(ctx, policy.NewRegoEvaluator(debug))
 
 	// read request body
 	requestBody, err := io.ReadAll(req.Body)
@@ -98,18 +115,11 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tufClient, err := h.createTUFClient()
+	// create a new verifier for each request
+	attest, err := h.newVerifier()
 	if err != nil {
-		utils.SendResponse(nil, fmt.Sprintf("unable to create TUF client: %v", err), w)
+		utils.SendResponse(nil, fmt.Sprintf("unable to create verifier: %v", err), w)
 		return
-	}
-
-	policyOpts := &policy.Options{
-		TUFClient:        tufClient,
-		LocalTargetsDir:  h.opts.PolicyCacheDir,
-		LocalPolicyDir:   h.opts.PolicyDir,
-		AttestationStyle: config.AttestationStyle(h.opts.AttestationStyle),
-		ReferrersRepo:    h.opts.ReferrersRepo,
 	}
 
 	results := make([]externaldata.Item, 0)
@@ -121,7 +131,7 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		result, err := attest.Verify(ctx, src, policyOpts)
+		result, err := attest.Verify(ctx, src)
 		if err != nil {
 			utils.SendResponse(nil, err.Error(), w)
 			return
