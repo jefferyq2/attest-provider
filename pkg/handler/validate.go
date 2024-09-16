@@ -70,11 +70,11 @@ func (h *validateHandler) newVerifier(ctx context.Context) (attest.Verifier, err
 
 	policyOpts := &policy.Options{
 		TUFClientOptions: &tuf.ClientOptions{
-			InitialRoot:    root.Data,
-			Path:           h.opts.TUFOutputPath,
-			MetadataSource: h.opts.TUFMetadataURL,
-			TargetsSource:  h.opts.TUFTargetsURL,
-			VersionChecker: tuf.NewDefaultVersionChecker(),
+			InitialRoot:     root.Data,
+			LocalStorageDir: h.opts.TUFOutputPath,
+			MetadataSource:  h.opts.TUFMetadataURL,
+			TargetsSource:   h.opts.TUFTargetsURL,
+			VersionChecker:  tuf.NewDefaultVersionChecker(),
 		},
 		LocalTargetsDir:  h.opts.PolicyCacheDir,
 		LocalPolicyDir:   h.opts.PolicyDir,
