@@ -28,6 +28,7 @@ type ValidationResult struct {
 
 type ValidateHandlerOptions struct {
 	TUFRoot        string
+	TUFChannel     string
 	TUFOutputPath  string
 	TUFMetadataURL string
 	TUFTargetsURL  string
@@ -74,6 +75,7 @@ func (h *validateHandler) newVerifier(ctx context.Context) (attest.Verifier, err
 			LocalStorageDir: h.opts.TUFOutputPath,
 			MetadataSource:  h.opts.TUFMetadataURL,
 			TargetsSource:   h.opts.TUFTargetsURL,
+			PathPrefix:      h.opts.TUFChannel,
 			VersionChecker:  tuf.NewDefaultVersionChecker(),
 		},
 		LocalTargetsDir:  h.opts.PolicyCacheDir,

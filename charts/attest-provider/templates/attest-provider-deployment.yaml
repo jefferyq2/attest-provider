@@ -33,6 +33,9 @@ spec:
         {{- if .Values.tufRoot }}
         - --tuf-root={{ .Values.tufRoot }}
         {{- end }}
+        {{- if .Values.tufChannel }}
+        - --tuf-channel={{ .Values.tufChannel }}
+        {{- end }}
         {{- if .Values.handlerTimeout }}
         - --handler-timeout={{ .Values.handlerTimeout }}
         {{- end }}

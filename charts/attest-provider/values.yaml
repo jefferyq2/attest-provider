@@ -16,6 +16,7 @@ replicas: 1
 # tufTargetsSource: registry-1.docker.io/docker/tuf-targets-staging
 
 tufRoot: prod
+tufChannel: ""
 tufMetadataSource: registry-1.docker.io/docker/tuf-metadata
 tufTargetsSource: registry-1.docker.io/docker/tuf-targets
 
