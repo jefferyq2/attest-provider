@@ -37,6 +37,7 @@ var (
 	handlerTimeoutSeconds int
 
 	tufRoot       string
+	tufChannel    string
 	tufoutputPath string
 	metadataURL   string
 	targetsURL    string
@@ -51,6 +52,7 @@ var (
 const (
 	defaultMetadataURL = "registry-1.docker.io/docker/tuf-metadata:latest"
 	defaultTargetsURL  = "registry-1.docker.io/docker/tuf-targets"
+	defaultTUFChannel  = ""
 )
 
 var (
@@ -69,6 +71,7 @@ func init() {
 	flag.IntVar(&handlerTimeoutSeconds, "handler-timeout", 25, "timeout for handler in seconds")
 
 	flag.StringVar(&tufRoot, "tuf-root", "prod", "specify embedded tuf root [dev, staging, prod], default [prod]")
+	flag.StringVar(&tufChannel, "tuf-channel", defaultTUFChannel, "release channel [prod, testing], default [prod]")
 	flag.StringVar(&metadataURL, "tuf-metadata-source", defaultMetadataURL, "source (URL or repo) for TUF metadata")
 	flag.StringVar(&targetsURL, "tuf-targets-source", defaultTargetsURL, "source (URL or repo) for TUF targets")
 	flag.StringVar(&tufoutputPath, "tuf-output-path", defaultTUFOutputPath, "local dir to store TUF repo metadata")
@@ -88,8 +91,13 @@ func main() {
 
 	ctx := useragent.Set(context.Background(), "attest-provider/"+version+" (docker)")
 
+	if tufChannel == "prod" {
+		tufChannel = ""
+	}
+
 	validateHandler, err := handler.NewValidateHandler(ctx, &handler.ValidateHandlerOptions{
 		TUFRoot:          tufRoot,
+		TUFChannel:       tufChannel,
 		TUFOutputPath:    tufoutputPath,
 		TUFMetadataURL:   metadataURL,
 		TUFTargetsURL:    targetsURL,
