@@ -10,7 +10,7 @@ import (
 
 	"github.com/docker/attest"
 	"github.com/docker/attest-provider/pkg/utils"
-	"github.com/docker/attest/config"
+	"github.com/docker/attest/mapping"
 	"github.com/docker/attest/oci"
 	"github.com/docker/attest/policy"
 	"github.com/docker/attest/tuf"
@@ -28,6 +28,7 @@ type ValidationResult struct {
 
 type ValidateHandlerOptions struct {
 	TUFRoot        string
+	TUFChannel     string
 	TUFOutputPath  string
 	TUFMetadataURL string
 	TUFTargetsURL  string
@@ -62,7 +63,7 @@ func NewValidateHandler(ctx context.Context, opts *ValidateHandlerOptions) (http
 	return handler, nil
 }
 
-func (h *validateHandler) newVerifier(ctx context.Context) (attest.Verifier, error) {
+func (h *validateHandler) newVerifier(ctx context.Context) (*attest.ImageVerifier, error) {
 	root, err := tuf.GetEmbeddedRoot(h.opts.TUFRoot)
 	if err != nil {
 		return nil, err
@@ -70,19 +71,20 @@ func (h *validateHandler) newVerifier(ctx context.Context) (attest.Verifier, err
 
 	policyOpts := &policy.Options{
 		TUFClientOptions: &tuf.ClientOptions{
-			InitialRoot:    root.Data,
-			Path:           h.opts.TUFOutputPath,
-			MetadataSource: h.opts.TUFMetadataURL,
-			TargetsSource:  h.opts.TUFTargetsURL,
-			VersionChecker: tuf.NewDefaultVersionChecker(),
+			InitialRoot:     root.Data,
+			LocalStorageDir: h.opts.TUFOutputPath,
+			MetadataSource:  h.opts.TUFMetadataURL,
+			TargetsSource:   h.opts.TUFTargetsURL,
+			PathPrefix:      h.opts.TUFChannel,
+			VersionChecker:  tuf.NewDefaultVersionChecker(),
 		},
 		LocalTargetsDir:  h.opts.PolicyCacheDir,
 		LocalPolicyDir:   h.opts.PolicyDir,
-		AttestationStyle: config.AttestationStyle(h.opts.AttestationStyle),
+		AttestationStyle: mapping.AttestationStyle(h.opts.AttestationStyle),
 		ReferrersRepo:    h.opts.ReferrersRepo,
 		Debug:            true,
 	}
-	verifier, err := attest.NewVerifier(ctx, policyOpts)
+	verifier, err := attest.NewImageVerifier(ctx, policyOpts)
 	if err != nil {
 		return nil, err
 	}
