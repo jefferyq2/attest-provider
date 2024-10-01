@@ -1,4 +1,4 @@
-image: "docker/attest-provider:0.0.11@sha256:fc5cf776585965e15f667709c3299c275322163614015702dffe856f6e95bbab"
+image: "docker/attest-provider:0.1.0@sha256:b401274d424223696dc7291c1845ebc2f34e77e43ab61d206ed87dbe6d4cbe52"
 
 certDir: /certs
 clientCAFile: /tmp/gatekeeper/ca.crt
