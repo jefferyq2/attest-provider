@@ -43,7 +43,7 @@ docker-buildx-builder:
 
 .PHONY: docker-buildx
 docker-buildx: docker-buildx-builder
-	docker buildx build --platform linux/amd64 --load -t ${IMG} . --secret=id=GITHUB_TOKEN
+	docker buildx build --platform linux/amd64 --load -t ${IMG} .
 
 .PHONY: kind-load-image
 kind-load-image:
