@@ -24,14 +24,6 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Generate GitHub App Token
-        id: app-token
-        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
-        with:
-          app-id: ${{ vars.DOCKER_READ_APP_ID }}
-          private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
-          repositories: "attest,attest-provider"
-
       - name: Set up Go 1.22
         uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
         with:
@@ -39,12 +31,6 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-
-      - name: Download dependencies
-        run: |
-          export GOPRIVATE="github.com/docker/attest"
-          git config --global "url.https://x-access-token:${{ steps.app-token.outputs.token }}@github.com.insteadof" "https://github.com"
-          go mod download
 
       # source: https://github.com/golangci/golangci-lint-action
       - name: golangci-lint
@@ -71,14 +57,6 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-
-      - name: Generate GitHub App Token
-        id: app-token
-        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
-        with:
-          app-id: ${{ vars.DOCKER_READ_APP_ID }}
-          private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
-          repositories: "attest,attest-provider"
 
       - name: Bootstrap e2e
         env:
@@ -110,7 +88,6 @@ jobs:
       - name: Build and install attest-provider
         run: |
           ./scripts/generate-tls-cert.sh
-          export GITHUB_TOKEN=${{ steps.app-token.outputs.token }}
           make docker-buildx kind-load-image
           helm install attest-provider charts/attest-provider \
             --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
